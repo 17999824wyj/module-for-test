@@ -1,0 +1,29 @@
+# 定义一个变量，用于存储所有以test开头的目录
+TEST_DIRS := $(shell find . -maxdepth 1 -type d -name 'test*' -not -path './.*')
+
+# 定义目标all，它依赖于所有测试目录的构建结果
+all: $(TEST_DIRS)
+
+# 定义一个伪目标，用于创建res.json文件并初始化为空数组
+res.json:
+	mkdir -p $(dir$@) && echo '[]' > $@
+
+# 为每个测试目录创建规则
+$(TEST_DIRS):
+	@echo "Building $@..."
+	@make -C $@ # 进入到每个测试目录并执行其Makefile
+	@echo "Finished building $@."
+
+# 每个测试目录构建完成后，将结果追加到res.json文件
+$(TEST_DIRS): res.json
+	@echo "Appending results from $@ to res.json..."
+	@if [ -f $@/result.json ]; then \
+		cat $@/result.json >> res.json; \
+		echo "," >> res.json; \
+	else \
+		echo "No result.json found in $@."; \
+	fi
+
+# 清理目标，用于清理生成的文件
+clean:
+	rm -f res.json
