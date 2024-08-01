@@ -1,14 +1,13 @@
-.PHONY: all clean res.json $(TEST_DIRS) $(TEST_DIRS-clean) $(TEST_DIRS-res)
+.PHONY: all clean res.json $(TEST_DIRS)$(TEST_DIRS-clean) $(TEST_DIRS-res)
 
-TEST_DIRS = $(shell find . -maxdepth 1 -type d -name 'test*')
-TEST_DIRS-clean = $(foreach dir,$(TEST_DIRS),$(dir)/clean)
-TEST_DIRS-res = $(foreach dir,$(TEST_DIRS),$(dir)/result.json)
+TEST_DIRS := $(shell find . -maxdepth 1 -type d -name 'test*')
+TEST_DIRS-clean := $(addsuffix /clean,$(TEST_DIRS))
+TEST_DIRS-res := $(addsuffix /result.json,$(TEST_DIRS))
 
-all: $(TEST_DIRS) res.json
+all: $(TEST_DIRS-res) res.json
 
 res.json: $(TEST_DIRS-res)
 	@echo '{ "results": [' > $@
-	@echo "[LOG] >> Collecting results..."
 	@first=1; for result in $(TEST_DIRS-res); do \
 		if [ $$first -eq 1 ]; then \
 			first=0; \
@@ -23,18 +22,16 @@ res.json: $(TEST_DIRS-res)
 	done
 	@echo ']\n}' >> $@
 
-
-$(TEST_DIRS): $(TEST_DIRS)/result.json
-
-$(TEST_DIRS)/result.json:
+$(TEST_DIRS-res):
 	@echo "[LOG] >> Building $@..."
-	@make -C $(@D)
-	@echo "[LOG] >> Finished building $(@D)."
+	@make all -C $(dir $@)
+	@echo "[LOG] >> Finished building $(dir $@)."
 
 $(TEST_DIRS-clean):
-	@echo "[LOG] >> Cleaning $(@D)..."
-	@make clean -C $(@D)
-	@echo "[LOG] >> Finished cleaning $(@D)."
+	@echo "[LOG] >> Cleaning $(dir $@)..."
+	@make clean -C $(dir $@)
+	@echo "[LOG] >> Finished cleaning $(dir $@)."
 
 clean: $(TEST_DIRS-clean)
+	@echo "[LOG] >> Cleaning $(CURDIR)..."
 	@rm -f res.json
