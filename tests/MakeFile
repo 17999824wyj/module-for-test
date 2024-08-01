@@ -1,29 +1,32 @@
-# 定义一个变量，用于存储所有以test开头的目录
-TEST_DIRS := $(shell find . -maxdepth 1 -type d -name 'test*' -not -path './.*')
+# 定义伪目标，这些目标不是文件，而是代表某些操作的名称
+.PHONY: all clean res.json $(TEST_DIRS)
 
-# 定义目标all，它依赖于所有测试目录的构建结果
-all: $(TEST_DIRS)
+# 定义变量 TEST_DIRS，它包含所有以 'test' 开头的目录
+TEST_DIRS = $(shell find . -maxdepth 1 -type d -name 'test*')
 
-# 定义一个伪目标，用于创建res.json文件并初始化为空数组
+# 定义 'all' 目标，它依赖于 res.json 文件和所有测试目录
+all: res.json $(TEST_DIRS)
+
+# 定义 'res.json' 目标，创建一个空 JSON 文件
 res.json:
-	mkdir -p $(dir$@) && echo '[]' > $@
+	echo '[]' > $@
 
-# 为每个测试目录创建规则
+# 为每个测试目录定义构建规则
 $(TEST_DIRS):
 	@echo "Building $@..."
-	@make -C $@ # 进入到每个测试目录并执行其Makefile
+	@make -C $@
 	@echo "Finished building $@."
 
-# 每个测试目录构建完成后，将结果追加到res.json文件
-$(TEST_DIRS): res.json
+# 为每个测试目录定义规则，以将构建结果追加到 res.json 文件
+$(TEST_DIRS):$(TEST_DIRS)/result.json res.json
 	@echo "Appending results from $@ to res.json..."
 	@if [ -f $@/result.json ]; then \
 		cat $@/result.json >> res.json; \
-		echo "," >> res.json; \
+		sed -i '$s/,$//' res.json; \
 	else \
 		echo "No result.json found in $@."; \
 	fi
 
-# 清理目标，用于清理生成的文件
+# 定义 'clean' 目标，用于清理生成的文件
 clean:
-	rm -f res.json
+	rm -f res.json # 删除 res.json 文件
