@@ -8,7 +8,7 @@ all: $(TEST_DIRS) res.json
 
 res.json: $(TEST_DIRS-res)
 	@echo '{ "results": [' > $@
-	@echo "Collecting results..."
+	@echo "[LOG] >> Collecting results..."
 	@first=1; for result in $(TEST_DIRS-res); do \
 		if [ $$first -eq 1 ]; then \
 			first=0; \
@@ -18,7 +18,7 @@ res.json: $(TEST_DIRS-res)
 		if [ -f $$result ]; then \
 			cat $$result >> $@; \
 		else \
-			echo "No result.json found in $$result."; \
+			echo "[LOG] >> No result.json found in $$result."; \
 		fi; \
 	done
 	@echo ']\n}' >> $@
@@ -27,14 +27,14 @@ res.json: $(TEST_DIRS-res)
 $(TEST_DIRS): $(TEST_DIRS)/result.json
 
 $(TEST_DIRS)/result.json:
-	@echo "Building $@..."
+	@echo "[LOG] >> Building $@..."
 	@make -C $(@D)
-	@echo "Finished building $(@D)."
+	@echo "[LOG] >> Finished building $(@D)."
 
 $(TEST_DIRS-clean):
-	@echo "Cleaning $(@D)..."
+	@echo "[LOG] >> Cleaning $(@D)..."
 	@make clean -C $(@D)
-	@echo "Finished cleaning $(@D)."
+	@echo "[LOG] >> Finished cleaning $(@D)."
 
 clean: $(TEST_DIRS-clean)
-	rm -f res.json
+	@rm -f res.json

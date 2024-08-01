@@ -1,11 +1,11 @@
-.PHONY: all clean $(SUBDIRS)
+.PHONY: all clean $(SUBDIRS) $(SUBDIRS-clean)
 
 SUBDIRS := performance function
+SUBDIRS-clean := $(foreach dir,$(SUBDIRS),$(dir)/clean)
 RESULT_FILE := result.json
 CURRENT_DIR := $(notdir $(CURDIR))
 
 all: $(SUBDIRS)
-	@echo "Collecting results..."
 	@echo "{\n\"name\": \"$(CURRENT_DIR)\",\n\"res\": [" >$(RESULT_FILE)
 	@first=1; for dir in $(SUBDIRS); do \
 		if [ $$first -eq 1 ]; then \
@@ -27,8 +27,10 @@ all: $(SUBDIRS)
 $(SUBDIRS):
 	@make -C $@
 
-clean:
+$(SUBDIRS-clean):
+	@echo "[LOG] >> Cleaning $(@D)..."
+	@make clean -C $(@D)
+	@echo "[LOG] >> Finished cleaning $(@D)."
+
+clean: $(SUBDIRS-clean)
 	@rm -f $(RESULT_FILE)
-	@for dir in $(SUBDIRS); do \
-		rm -f $$dir/result.json; \
-	done

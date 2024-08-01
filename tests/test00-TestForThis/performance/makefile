@@ -4,13 +4,13 @@
 all: result.json
 
 result.json:
-	@echo "Running function tests..."
+	@echo "[LOG] >> Running performance tests..."
 	@./exec.sh
 	@if [ ! -f $@ ]; then \
-		echo "Error: exec.sh did not produce a result.json file."; \
+		echo "[LOG] >> Error: exec.sh did not produce a result.json file."; \
 		exit 1; \
 	fi
 
 clean:
 	@rm -f result.json
-	@rm -f exec.sh.txt
+	@rm -f res.txt

@@ -3,7 +3,7 @@
 # 脚本文件路径
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 FUNC_SCRIPT_DIR="../function"
-EXEC_CMD="../../performance_counter_920.sh ${FUNC_SCRIPT_DIR}/exec.sh ./"
+EXEC_CMD="../../performance_counter_920.sh ${FUNC_SCRIPT_DIR}/exec.sh ./res.txt"
 
 # 执行EXEC_CMD命令
 ${EXEC_CMD}
